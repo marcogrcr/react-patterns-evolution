@@ -73,6 +73,8 @@
         return [text, value => dispatch({ type: "SET_TEXT", value })];
       }
 
+      //
+      // React components
       function Counter() {
         const [count, increaseCount, decreaseCount] = useCount();
 
@@ -85,8 +87,6 @@
         );
       }
 
-      //
-      // React components
       function Textbox() {
         const [text, setText] = useText();
 
