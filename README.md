@@ -21,4 +21,4 @@ The example application consinsts of two components:
 
 ## How to run
 
-Download the repository and open any file with a modern web browser. Alternatively, use [jsdelivr](https://www.jsdelivr.com/?docs=gh) to view the files without having to download the repository.
+Download the repository and open any file with a modern web browser.
