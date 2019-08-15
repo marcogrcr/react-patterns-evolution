@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>React playground</title>
+  </head>
+  <body>
+    <div id="app"></div>
+
+    <!-- react -->
+    <script
+      crossorigin
+      src="https://unpkg.com/react@16/umd/react.development.js"
+    ></script>
+    <script
+      crossorigin
+      src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"
+    ></script>
+
+    <!-- redux -->
+    <script crossorigin src="https://unpkg.com/redux/dist/redux.js"></script>
+
+    <!-- react-redux -->
+    <script
+      crossorigin
+      src="https://unpkg.com/react-redux@7.1.0/dist/react-redux.js"
+    ></script>
+
+    <!-- babel -->
+    <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+
+    <script type="text/babel">
+      //
+      // Imports
+      const { createElement, Fragment, useEffect } = React;
+      const { render } = ReactDOM;
+      const { createStore } = Redux;
+      const { Provider, useDispatch, useSelector } = ReactRedux;
+
+      //
+      // Redux setup
+      const rootReducer = (state = { count: 0, text: "" }, action) => {
+        switch (action.type) {
+          case "INCREASE_COUNT":
+            return { ...state, count: state.count + 1 };
+          case "DECREASE_COUNT":
+            return { ...state, count: state.count - 1 };
+          case "SET_TEXT":
+            return { ...state, text: action.value };
+          default:
+            return state;
+        }
+      };
+      const store = createStore(rootReducer);
+
+      //
+      // Custom React hooks
+      function useCount() {
+        const count = useSelector(state => state.count);
+        const dispatch = useDispatch();
+
+        return [
+          count,
+          () => dispatch({ type: "INCREASE_COUNT" }),
+          () => dispatch({ type: "DECREASE_COUNT" })
+        ];
+      }
+
+      function useText() {
+        const text = useSelector(state => state.text);
+        const dispatch = useDispatch();
+
+        return [text, value => dispatch({ type: "SET_TEXT", value })];
+      }
+
+      function Counter() {
+        const [count, increaseCount, decreaseCount] = useCount();
+
+        return (
+          <div>
+            <button onClick={() => increaseCount()}>+</button>
+            <button onClick={() => decreaseCount()}>-</button>
+            <span>Current count: {count}</span>
+          </div>
+        );
+      }
+
+      //
+      // React components
+      function Textbox() {
+        const [text, setText] = useText();
+
+        useEffect(() => {
+          // componentDidMount (no componentDidUpdate because of the `[]` argument)
+          const timerId = setTimeout(() => {
+            setText("Done!");
+          }, 1000);
+
+          // componentDidUnmount
+          return () => {
+            clearTimeout(timerId);
+          };
+        }, []);
+
+        return (
+          <div>
+            <input
+              onChange={e => setText(e.target.value)}
+              type="text"
+              value={text}
+            />
+            <span>Current text: {text}</span>
+          </div>
+        );
+      }
+
+      function App() {
+        const [count] = useCount();
+
+        return (
+          <Fragment>
+            <Counter />
+            {count !== 1 ? <Textbox /> : null}
+          </Fragment>
+        );
+      }
+
+      //
+      // React component that uses redux provider
+      function Root() {
+        return (
+          <Provider store={store}>
+            <App />
+          </Provider>
+        );
+      }
+
+      //
+      // React bootstrap
+      render(createElement(Root), document.querySelector("#app"));
+    </script>
+  </body>
+</html>

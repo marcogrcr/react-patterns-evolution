@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>React playground</title>
+  </head>
+  <body>
+    <div id="app"></div>
+
+    <!-- react -->
+    <script
+      crossorigin
+      src="https://unpkg.com/react@16/umd/react.development.js"
+    ></script>
+    <script
+      crossorigin
+      src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"
+    ></script>
+
+    <!-- redux -->
+    <script crossorigin src="https://unpkg.com/redux/dist/redux.js"></script>
+
+    <!-- react-redux -->
+    <script
+      crossorigin
+      src="https://unpkg.com/react-redux@7.1.0/dist/react-redux.js"
+    ></script>
+
+    <!-- babel -->
+    <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+
+    <script type="text/babel">
+      //
+      // Imports
+      const { createElement, Fragment } = React;
+      const { render } = ReactDOM;
+      const { createStore } = Redux;
+      const { connect, Provider } = ReactRedux;
+
+      //
+      // Redux setup
+      const rootReducer = (state = { count: 0, text: "" }, action) => {
+        switch (action.type) {
+          case "INCREASE_COUNT":
+            return { ...state, count: state.count + 1 };
+          case "DECREASE_COUNT":
+            return { ...state, count: state.count - 1 };
+          case "SET_TEXT":
+            return { ...state, text: action.value };
+          default:
+            return state;
+        }
+      };
+      const store = createStore(rootReducer);
+
+      //
+      // React components
+      function CounterComponent(props) {
+        const { count, increaseCount, decreaseCount } = props;
+
+        return (
+          <div>
+            <button onClick={() => increaseCount()}>+</button>
+            <button onClick={() => decreaseCount()}>-</button>
+            <span>Current count: {count}</span>
+          </div>
+        );
+      }
+
+      function TextboxComponent(props) {
+        const { text, setText } = props;
+
+        return (
+          <div>
+            <input
+              onChange={e => setText(e.target.value)}
+              type="text"
+              value={text}
+            />
+            <span>Current text: {text}</span>
+          </div>
+        );
+      }
+
+      function AppComponent(props) {
+        const { count } = props;
+
+        return (
+          <Fragment>
+            <Counter />
+            {count !== 1 ? <Textbox /> : null}
+          </Fragment>
+        );
+      }
+
+      //
+      // React component connection with redux
+      const Counter = connect(
+        state => ({
+          count: state.count
+        }),
+        dispatch => ({
+          increaseCount: () => dispatch({ type: "INCREASE_COUNT" }),
+          decreaseCount: () => dispatch({ type: "DECREASE_COUNT" })
+        })
+      )(CounterComponent);
+
+      const Textbox = connect(
+        state => ({
+          text: state.text
+        }),
+        dispatch => ({
+          setText: value => dispatch({ type: "SET_TEXT", value })
+        })
+      )(TextboxComponent);
+
+      const App = connect(state => ({ count: state.count }))(AppComponent);
+
+      //
+      // React component that uses redux provider
+      function Root() {
+        return (
+          <Provider store={store}>
+            <App />
+          </Provider>
+        );
+      }
+
+      //
+      // React bootstrap
+      render(createElement(Root), document.querySelector("#app"));
+    </script>
+  </body>
+</html>
